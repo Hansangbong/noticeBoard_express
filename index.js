@@ -48,6 +48,14 @@ app.post('/test/write', (req, res) => {
 
 });
 
+app.post('/test/delete', (req, res) => {
+    const id = req.body.id;
+    connection.query('delete from contents where id = ?', [id], (error, rows) => {
+        if (error) throw error;
+        res.send(rows);
+    });
+});
+
 
 
 
