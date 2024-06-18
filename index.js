@@ -24,10 +24,11 @@ app.post('/test/detail', (req, res) => {  // 제목 클릭 시 글 보기
     const id = req.body.id;
     console.log("req입니다: ", req);
     console.log("요청받은 id입니다: ", id);
-    connection.query('SELECT * from contents Where id = ?', [id], (error, rows) => {
-        if (error) throw error;
-        res.send(rows);
-    })
+    connection.query(`select title,content,JSON_ARRAYAGG(JSON_OBJECT('c',comments.comment)) as comment from contents LEFT JOIN comments ON contents.id = comments.content_id WHERE contents.id = ? GROUP BY title, content`
+        , [id], (error, rows) => {
+            if (error) throw error;
+            res.json(rows);
+        })
 });
 
 
@@ -37,7 +38,7 @@ app.post('/test/write', (req, res) => {
     const title = req.body.title;
     const content = req.body.content;
     console.log("body입니다: ", req.body);
-    let insertList = {};
+    let insertList;
     //insertList.push(req.body);
     insertList = [title, content];
     console.log("가공된 배열입니다: ", insertList);
