@@ -24,7 +24,7 @@ app.post('/test/detail', (req, res) => {  // 제목 클릭 시 글 보기
     const id = req.body.id;
     console.log("req입니다: ", req);
     console.log("요청받은 id입니다: ", id);
-    connection.query(`select title,content,JSON_ARRAYAGG(JSON_OBJECT('c',comments.comment)) as comment from contents LEFT JOIN comments ON contents.id = comments.content_id WHERE contents.id = ? GROUP BY title, content`
+    connection.query(`select title,content,JSON_ARRAYAGG(JSON_OBJECT('c',comments.comment)) as comment, JSON_ARRAYAGG(JSON_OBJECT('i',comments.comment_id)) as cmtid from contents LEFT JOIN comments ON contents.id = comments.content_id WHERE contents.id = ? GROUP BY title, content`
         , [id], (error, rows) => {
             if (error) throw error;
             res.json(rows);
@@ -46,8 +46,29 @@ app.post('/test/write', (req, res) => {
         if (error) throw error;
         res.send(rows);
     });
-
 });
+
+app.post('/test/update', (req, res) => {
+    console.log("update의 req입니다: ", req);
+    const title = req.body.title;
+    const content = req.body.content;
+    const id = req.body.id;
+    const insertList = [title, content, id];
+    connection.query(`UPDATE contents SET title = ?, content = ? WHERE id = ?`, insertList, (error, rows) => {
+        if (error) throw error;
+        res.send(rows);
+    });
+});
+
+app.post('/test/comment_insert', (req, res) => {
+    const id = req.body.id;
+    const comment = req.body.comment;
+    const insertList = [id, comment];
+    connection.query('INSERT INTO COMMENTS (content_id, comment) value (? , ?)', insertList, (error, rows) => {
+        if (error) throw error;
+        res.send(rows);
+    })
+})
 
 app.post('/test/delete', (req, res) => {
     const id = req.body.id;
@@ -57,7 +78,14 @@ app.post('/test/delete', (req, res) => {
     });
 });
 
-
+app.post('/test/deleteCMT', (req, res) => {
+    console.log("deleteCMT의 req입니다: ", req.body)
+    const id = req.body.comment_id;
+    connection.query('DELETE FROM comments WHERE comment_id = ?', [id], (error, rows) => {
+        if (error) throw error;
+        res.send(rows);
+    });
+});
 
 
 
